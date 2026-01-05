@@ -13,7 +13,7 @@ Disallow: /cleanup.php
 Disallow: /vendor/
 Disallow: /*.php$
 
-Sitemap: http://localhost/publicfiles/sitemap.xml
+Sitemap: https://just-share-arac.onrender.com/sitemap.xml
 
 # Allow search engines to index the main pages but protect user files and admin functions
 # Files in /file/, /download/, /delete/ are user-generated content and should not be indexed
