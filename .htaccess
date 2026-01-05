@@ -1,0 +1,73 @@
+RewriteEngine On
+
+# Custom 404 Page
+ErrorDocument 404 /publicfiles/404.php
+
+# Security Headers
+<IfModule mod_headers.c>
+    # Content Security Policy - simplified and fixed
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: https: blob:; connect-src 'self' https://cdn.jsdelivr.net; frame-ancestors 'self'; base-uri 'self'; form-action 'self';"
+    
+    # Anti-clickjacking
+    Header always set X-Frame-Options "SAMEORIGIN"
+    
+    # MIME type sniffing protection
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # HSTS (Strict-Transport-Security)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    
+    # Remove X-Powered-By header
+    Header unset X-Powered-By
+    
+    # Referrer Policy
+    Header always set Referrer-Policy "no-referrer-when-downgrade"
+    
+    # Permissions Policy
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+Options -Indexes
+
+# Block access to dot files (like .git, .env) and other sensitive files
+<FilesMatch "^\.|^composer\.(json|lock)$|^package(-lock)?\.json$|\.(bak|config|sql|fla|psd|ini|log|sh|inc|swp|dist)$">
+    Require all denied
+</FilesMatch>
+
+# Disable server signature
+ServerSignature Off
+
+DirectoryIndex index.php
+
+
+# Prevent directory listing
+Options -Indexes
+
+# Route /file/slug to view.php
+RewriteRule ^file/([a-zA-Z0-9-_]+)$ view.php?slug=$1 [L,QSA]
+
+# Route /download/slug to download.php
+RewriteRule ^download/([a-zA-Z0-9-_]+)$ download.php?slug=$1 [L,QSA]
+
+# Route /delete/slug to delete.php
+RewriteRule ^delete/([a-zA-Z0-9-_]+)$ delete.php?slug=$1 [L,QSA]
+
+# Route /home to index.php
+RewriteRule ^home$ index.php [L]
+
+# Route /files to gallery.php
+RewriteRule ^files$ gallery.php [L]
+
+# Route /delete/slug to delete.php
+RewriteRule ^delete/([a-zA-Z0-9-_]+)$ delete.php?slug=$1 [L,QSA]
+RewriteRule ^home/?$ index.php [L,QSA]
+RewriteRule ^files/?$ gallery.php [L,QSA]
+RewriteRule ^2fa-verify/?$ admin/2fa-verify.php [L]
+
+# 404 page
+RewriteRule ^404/?$ 404.php [L]
+
+# Catch-all: redirect any unmatched URL to 404 (MUST BE LAST)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ 404.php [L,R=404]
