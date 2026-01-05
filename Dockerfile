@@ -28,6 +28,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY . /var/www/html
 
 # Install dependencies
+# Remove local composer.lock and vendor to ensure fresh install for this environment
+RUN rm -rf vendor composer.lock
+
 # --no-dev: Don't install development dependencies
 # --optimize-autoloader: Optimize autoloader for production
 RUN composer install --no-dev --optimize-autoloader
