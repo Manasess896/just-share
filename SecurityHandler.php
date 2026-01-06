@@ -16,8 +16,6 @@ class SecurityHandler {
         $this->config = $config;
         $this->collection = $client->selectCollection($database, $config['collections']['rate_limits']);
     }
- 
-     //check and enforce rate limiting
     public function checkRateLimit(): array {
         $clientIp = $this->getClientIp();
         $currentTime = time();
@@ -28,7 +26,6 @@ class SecurityHandler {
         
 
 
-        //count uploads \\
         $count = $this->collection->countDocuments([
             'timestamp' => ['$gte' => $windowStart],
             'ip' => $clientIp

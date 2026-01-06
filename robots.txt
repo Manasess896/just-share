@@ -1,20 +1,22 @@
+
 User-agent: *
 Allow: /
+
+#pages i want to be indexed
+Allow: /index.php
+Allow: /gallery.php
 Allow: /home
 Allow: /files
-Disallow: /file/
-Disallow: /download/
-Disallow: /delete/
+
+
+#block logic files
 Disallow: /upload.php
 Disallow: /delete.php
 Disallow: /view.php
 Disallow: /download.php
 Disallow: /cleanup.php
+
+# Block vendor & internals
 Disallow: /vendor/
-Disallow: /*.php$
 
 Sitemap: https://just-share-arac.onrender.com/sitemap.xml
-
-# Allow search engines to index the main pages but protect user files and admin functions
-# Files in /file/, /download/, /delete/ are user-generated content and should not be indexed
-# PHP files should not be directly accessed by search engines

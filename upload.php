@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'vendor/autoload.php';
 require_once 'config.php';
 require_once 'SecurityHandler.php';
@@ -8,11 +9,13 @@ use MongoDB\Client;
 use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->safeLoad();
-header('Content-Type: application/json');
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: home');
     exit;
 }
+
+header('Content-Type: application/json');
 
 try {
     $config = require 'config.php';
@@ -22,7 +25,7 @@ try {
     $security = new SecurityHandler($client, $database, $config);
     $fileHandler = new FileHandler($client, $database, $config);
 
-    // Validate CSRF token
+ 
     if (!$security->validateCsrfToken($_POST['csrf_token'] ?? null)) {
         http_response_code(403);
         echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
@@ -35,9 +38,6 @@ try {
         echo json_encode($rateLimitCheck);
         exit;
     }
-
-    // Record upload attempt
-    $security->recordUpload($fileCount);
 
     if (!isset($_FILES['files']) || empty($_FILES['files']['name'][0])) {
         http_response_code(400);

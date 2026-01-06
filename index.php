@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'vendor/autoload.php';
 require_once 'config.php';
 require_once 'FileHandler.php';
@@ -20,7 +21,12 @@ $client = new Client($mongoUri);
 $security = new SecurityHandler($client, $database, $config);
 $fileHandler = new FileHandler($client, $database, $config);
 
-// Always check for expired files when loading the page
+//generate CSRF token if not exists
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+//check for expired files for deletion when loading the page
 $fileHandler->cleanupExpiredFiles();
 ?>
 <!DOCTYPE html>
@@ -28,11 +34,9 @@ $fileHandler->cleanupExpiredFiles();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- Primary SEO Meta Tags -->
     <title>Just Share - Anonymous File Sharing | Upload & Share Documents Instantly</title>
     <meta name="description" content="Share documents, images, and files anonymously without account creation. Upload files with optional password protection, set expiration dates up to 365 days. Perfect for temporary file sharing on social media and web.">
-    <meta name="keywords" content="file sharing, temporary file sharing, upload files, share files online, instant file sharing, secure file transfer, no registration file sharing">
+    <meta name="keywords" content="file sharing, temporary file sharing,file.io,share ,no accounts,no regestration,free upload files, share files online, instant file sharing, secure file transfer, no registration file sharing">
     <meta name="author" content="Just Share">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="<?php echo $config['base_url']; ?>/home">
@@ -52,8 +56,6 @@ $fileHandler->cleanupExpiredFiles();
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <!-- Structured Data -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -94,7 +96,6 @@ $fileHandler->cleanupExpiredFiles();
             box-sizing: border-box;
         }
 
-        /* Navbar Customization */
         .navbar-custom {
             background-color: var(--card-bg);
             border-bottom: 1px solid var(--border-color);
@@ -649,7 +650,7 @@ $fileHandler->cleanupExpiredFiles();
         
         <div class="upload-card">
             <form id="uploadForm" enctype="multipart/form-data">
-                <input type="hidden" name="csrf_token" value="<?php echo $security->generateCsrfToken(); ?>">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                 <div class="upload-zone" id="uploadZone">
                     <div class="upload-icon">☁️</div>
                     <h3>Drop files here or click to upload</h3>
@@ -747,7 +748,6 @@ $fileHandler->cleanupExpiredFiles();
                 return;
             }
             selectedFiles = Array.from(files);
-            //Validate file sizes
             let totalSize = 0;
             for (let file of selectedFiles) {
                 if (file.size > maxFileSize) {
@@ -780,8 +780,6 @@ $fileHandler->cleanupExpiredFiles();
                 selectedFilesDiv.appendChild(fileItem);
             });
         }
-        
-        //     FUNCTION TO emove file from selection
         window.removeFile = function(index) {
             selectedFiles.splice(index, 1);
             const dt = new DataTransfer();
